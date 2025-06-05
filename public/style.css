@@ -1,0 +1,54 @@
+/* Générales */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background: #f7f7f7;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+  
+  /* Conteneur central */
+  .container {
+    background: #fff;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    max-width: 600px;
+    width: 90%;
+    box-sizing: border-box;
+    text-align: center;
+  }
+  
+  /* Input et bouton */
+  input[type="file"],
+  button {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    font-size: 16px;
+    box-sizing: border-box;
+  }
+  
+  button {
+    border: none;
+    background: #0077cc;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background: #005fa3;
+  }
+  
+  /* Canvas responsive */
+  canvas {
+    width: 100%;
+    height: auto;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
