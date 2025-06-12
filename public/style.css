@@ -1,54 +1,151 @@
 /* Générales */
 body {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    background: #f7f7f7;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-  }
-  
-  /* Conteneur central */
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background: #f7f7f7;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* Conteneur central */
+.container {
+  background: #fff;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  width: 95%;
+  max-width: 600px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+/* Contrôles */
+.controls {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.zoom-controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.zoom-controls button {
+  flex: 1;
+  padding: 8px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+/* Input et bouton principal */
+input[type="file"],
+#downloadBtn {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+button {
+  border: none;
+  background: #0077cc;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+button:hover {
+  background: #005fa3;
+}
+
+/* Conteneur du canvas */
+.canvas-wrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 133.33%; /* Ratio 3:4 (600x800) */
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f8f8f8;
+  box-sizing: border-box;
+}
+
+/* Canvas responsive */
+#canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  cursor: default;
+}
+
+/* Instructions */
+.instructions {
+  margin-top: 15px;
+  text-align: left;
+  font-size: 14px;
+  color: #666;
+}
+
+.instructions p {
+  margin: 5px 0;
+}
+
+/* Media Queries pour mobiles */
+@media (max-width: 768px) {
   .container {
-    background: #fff;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    border-radius: 8px;
-    max-width: 600px;
-    width: 90%;
-    box-sizing: border-box;
-    text-align: center;
+    padding: 15px;
   }
   
-  /* Input et bouton */
+  h2 {
+    font-size: 1.3rem;
+  }
+  
+  .zoom-controls {
+    flex-wrap: wrap;
+  }
+  
+  .zoom-controls button {
+    flex: 1 0 40%;
+    font-size: 13px;
+    padding: 8px 4px;
+  }
+  
   input[type="file"],
-  button {
+  #downloadBtn {
+    padding: 10px;
+    font-size: 14px;
+  }
+  
+  .instructions {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 10px;
     width: 100%;
-    padding: 12px;
-    margin: 10px 0;
-    font-size: 16px;
-    box-sizing: border-box;
+    border-radius: 0;
   }
   
-  button {
-    border: none;
-    background: #0077cc;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
+  body {
+    display: block;
+    padding: 0;
+    min-height: 100vh;
+    background: #fff;
   }
   
-  button:hover {
-    background: #005fa3;
+  .zoom-controls button {
+    flex: 1 0 100%;
   }
-  
-  /* Canvas responsive */
-  canvas {
-    width: 100%;
-    height: auto;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
+}
