@@ -135,20 +135,39 @@ function drawCanvas() {
     }
 }
 
-// Gestionnaires pour le déplacement
-canvas.addEventListener('mousedown', (e) => {
+// Fonction utilitaire pour obtenir les coordonnées de la souris ou du toucher
+function getCanvasCoordinates(event) {
+    const rect = canvas.getBoundingClientRect();
+    let clientX, clientY;
+    
+    if (event.type.includes('mouse')) {
+        clientX = event.clientX;
+        clientY = event.clientY;
+    } else if (event.type.includes('touch')) {
+        clientX = event.touches[0].clientX;
+        clientY = event.touches[0].clientY;
+    }
+    
+    return {
+        x: clientX - rect.left,
+        y: clientY - rect.top
+    };
+}
+
+// Gestionnaires pour le déplacement (souris ET tactile)
+function handleStart(event) {
     if (!userImage) return;
     
-    const rect = canvas.getBoundingClientRect();
-    lastMouseX = e.clientX - rect.left;
-    lastMouseY = e.clientY - rect.top;
+    const coords = getCanvasCoordinates(event);
+    lastMouseX = coords.x;
+    lastMouseY = coords.y;
     
     // Calculer les positions actuelles
     const circleX = ORIGINAL_CIRCLE_X * scaleRatio;
     const circleY = ORIGINAL_CIRCLE_Y * scaleRatio;
     const circleRadius = ORIGINAL_CIRCLE_RADIUS * scaleRatio;
     
-    // Vérifier si le clic est dans le cercle
+    // Vérifier si le contact est dans le cercle
     const distance = Math.sqrt(
         (lastMouseX - circleX) ** 2 + 
         (lastMouseY - circleY) ** 2
@@ -157,15 +176,16 @@ canvas.addEventListener('mousedown', (e) => {
     if (distance <= circleRadius) {
         isDragging = true;
         canvas.style.cursor = 'grabbing';
+        event.preventDefault(); // Empêcher le défilement sur mobile
     }
-});
+}
 
-canvas.addEventListener('mousemove', (e) => {
+function handleMove(event) {
     if (!isDragging || !userImage) return;
     
-    const rect = canvas.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
+    const coords = getCanvasCoordinates(event);
+    const mouseX = coords.x;
+    const mouseY = coords.y;
     
     // Calculer le déplacement
     const dx = (mouseX - lastMouseX) / scaleRatio;
@@ -180,37 +200,45 @@ canvas.addEventListener('mousemove', (e) => {
     imgOffsetX = Math.max(-maxOffset, Math.min(maxOffset, imgOffsetX));
     imgOffsetY = Math.max(-maxOffset, Math.min(maxOffset, imgOffsetY));
     
-    // Mettre à jour la position de la souris
+    // Mettre à jour la position du contact
     lastMouseX = mouseX;
     lastMouseY = mouseY;
     
     drawCanvas();
-});
+    event.preventDefault(); // Empêcher le défilement sur mobile
+}
 
-canvas.addEventListener('mouseup', () => {
+function handleEnd() {
     isDragging = false;
     canvas.style.cursor = 'default';
-});
+}
 
-canvas.addEventListener('mouseleave', () => {
-    isDragging = false;
-    canvas.style.cursor = 'default';
-});
+// Écouteurs pour souris
+canvas.addEventListener('mousedown', handleStart);
+canvas.addEventListener('mousemove', handleMove);
+canvas.addEventListener('mouseup', handleEnd);
+canvas.addEventListener('mouseleave', handleEnd);
 
-// Changement de curseur au survol
+// Écouteurs pour tactile
+canvas.addEventListener('touchstart', handleStart, { passive: false });
+canvas.addEventListener('touchmove', handleMove, { passive: false });
+canvas.addEventListener('touchend', handleEnd);
+canvas.addEventListener('touchcancel', handleEnd);
+
+// Changement de curseur au survol (uniquement pour souris)
 canvas.addEventListener('mousemove', (e) => {
     if (isDragging || !userImage) return;
     
-    const rect = canvas.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
+    const coords = getCanvasCoordinates(e);
+    const mouseX = coords.x;
+    const mouseY = coords.y;
     
     // Calculer les positions actuelles
     const circleX = ORIGINAL_CIRCLE_X * scaleRatio;
     const circleY = ORIGINAL_CIRCLE_Y * scaleRatio;
     const circleRadius = ORIGINAL_CIRCLE_RADIUS * scaleRatio;
     
-    // Vérifier si la souris est dans le cercle
+    // Vérifier si le curseur est dans le cercle
     const distance = Math.sqrt(
         (mouseX - circleX) ** 2 + 
         (mouseY - circleY) ** 2

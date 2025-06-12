@@ -86,6 +86,15 @@ button:hover {
   width: 100% !important;
   height: 100% !important;
   cursor: default;
+  
+  /* Empêcher la sélection de texte pendant le déplacement */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  touch-action: none; /* Désactive le défilement par défaut */
 }
 
 /* Instructions */
@@ -117,13 +126,15 @@ button:hover {
   .zoom-controls button {
     flex: 1 0 40%;
     font-size: 13px;
-    padding: 8px 4px;
+    padding: 10px 4px;
+    min-height: 44px; /* Taille minimale pour le tactile */
   }
   
   input[type="file"],
   #downloadBtn {
-    padding: 10px;
+    padding: 12px;
     font-size: 14px;
+    min-height: 44px;
   }
   
   .instructions {
@@ -148,4 +159,21 @@ button:hover {
   .zoom-controls button {
     flex: 1 0 100%;
   }
+}
+
+/* Effet de survol pour les boutons */
+button:active {
+  transform: scale(0.98);
+  filter: brightness(90%);
+}
+
+/* Personnalisation du bouton de fichier */
+input[type="file"] {
+  cursor: pointer;
+  border: 1px solid #ddd;
+  background: #f9f9f9;
+}
+
+input[type="file"]:hover {
+  background: #f0f0f0;
 }
