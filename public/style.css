@@ -1,3 +1,15 @@
+/* Global – Box sizing et overflow */
+html, body {
+  box-sizing: border-box;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+  max-width: 100%;
+}
+
 /* Générales */
 body {
   margin: 0;
@@ -30,17 +42,35 @@ body {
   gap: 10px;
 }
 
+/* Zoom-controls – version compacte */
 .zoom-controls {
   display: flex;
-  gap: 10px;
+  gap: 6px;            /* moins d’espacement entre les boutons */
   justify-content: center;
 }
 
 .zoom-controls button {
-  flex: 1;
-  padding: 8px;
+  flex: 0 1 auto;      /* ne s’étire pas pour remplir toute la ligne */
+  max-width: 100px;    /* limite leur largeur maxi */
+  padding: 6px 10px;   /* padding plus compact */
+  margin: 2px;         /* petit écart périphérique */
   font-size: 14px;
   white-space: nowrap;
+  border: none;
+  background: #0077cc;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.1s;
+}
+
+.zoom-controls button:hover {
+  background: #005fa3;
+}
+
+.zoom-controls button:active {
+  transform: scale(0.98);
+  filter: brightness(90%);
 }
 
 /* Input et bouton principal */
@@ -51,9 +81,6 @@ input[type="file"],
   margin: 10px 0;
   font-size: 16px;
   box-sizing: border-box;
-}
-
-button {
   border: none;
   background: #0077cc;
   color: white;
@@ -62,7 +89,8 @@ button {
   transition: background 0.3s;
 }
 
-button:hover {
+input[type="file"]:hover,
+#downloadBtn:hover {
   background: #005fa3;
 }
 
@@ -76,6 +104,7 @@ button:hover {
   border-radius: 4px;
   background-color: #f8f8f8;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 /* Canvas responsive */
@@ -130,11 +159,9 @@ button:hover {
   }
   
   .zoom-controls button {
-    flex: 1 0 45%;
-    padding: 12px 8px;
-    font-size: 16px;
-    min-height: 50px;
-    margin: 4px;
+    max-width: 80px;     /* encore plus compact */
+    padding: 8px 6px;
+    font-size: 15px;
   }
   
   input[type="file"],
@@ -156,21 +183,4 @@ button:hover {
     flex: 1 0 100%;
     margin: 5px 0;
   }
-}
-
-/* Effet de survol pour les boutons */
-button:active {
-  transform: scale(0.98);
-  filter: brightness(90%);
-}
-
-/* Personnalisation du bouton de fichier */
-input[type="file"] {
-  cursor: pointer;
-  border: 1px solid #ddd;
-  background: #f9f9f9;
-}
-
-input[type="file"]:hover {
-  background: #f0f0f0;
 }
