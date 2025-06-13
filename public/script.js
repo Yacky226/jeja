@@ -98,7 +98,7 @@ function drawCanvas() {
         ctx.closePath();
         ctx.clip();
 
-        // --- DÉBUT DE LA CORRECTION ---
+        // --- DÉBUT DE LA CORRECTION ----
         // Calculer les dimensions de l'image en conservant le ratio
         const circleDiameter = circleRadius * 2;
         const imgRatio = userImage.width / userImage.height;

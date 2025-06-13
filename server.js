@@ -33,7 +33,7 @@ app.post('/upload', upload.single('photo'), async (req, res) => {
     // Get the combined image buffer
     const buffer = await eventImage.getBufferAsync(Jimp.MIME_JPEG);
 
-    // Send image as base64 URL for preview
+    // Send image as base64 URL for preview ---
     res.json({
       image: `data:image/jpeg;base64,${buffer.toString('base64')}`
     });
