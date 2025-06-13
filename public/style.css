@@ -70,7 +70,7 @@ button:hover {
 .canvas-wrapper {
   position: relative;
   width: 100%;
-  padding-top: 133.33%; /* Ratio 3:4 (600x800) */
+  padding-top: 121.2%; /* Ratio exact 605/499 = 1.212 */
   margin: 10px 0;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -113,39 +113,8 @@ button:hover {
 @media (max-width: 768px) {
   .container {
     padding: 15px;
-  }
-  
-  h2 {
-    font-size: 1.3rem;
-  }
-  
-  .zoom-controls {
-    flex-wrap: wrap;
-  }
-  
-  .zoom-controls button {
-    flex: 1 0 40%;
-    font-size: 13px;
-    padding: 10px 4px;
-    min-height: 44px; /* Taille minimale pour le tactile */
-  }
-  
-  input[type="file"],
-  #downloadBtn {
-    padding: 12px;
-    font-size: 14px;
-    min-height: 44px;
-  }
-  
-  .instructions {
-    font-size: 13px;
-  }
-}
-
-@media (max-width: 480px) {
-  .container {
-    padding: 10px;
     width: 100%;
+    max-width: 100%;
     border-radius: 0;
   }
   
@@ -156,8 +125,36 @@ button:hover {
     background: #fff;
   }
   
+  .zoom-controls {
+    flex-wrap: wrap;
+  }
+  
+  .zoom-controls button {
+    flex: 1 0 45%;
+    padding: 12px 8px;
+    font-size: 16px;
+    min-height: 50px;
+    margin: 4px;
+  }
+  
+  input[type="file"],
+  #downloadBtn {
+    padding: 14px;
+    font-size: 16px;
+    min-height: 50px;
+  }
+  
+  .instructions {
+    font-size: 14px;
+    padding: 10px 0;
+  }
+}
+
+/* Boutons plus grands sur très petits écrans */
+@media (max-width: 480px) {
   .zoom-controls button {
     flex: 1 0 100%;
+    margin: 5px 0;
   }
 }
 

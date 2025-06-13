@@ -50,6 +50,7 @@ function resizeCanvas() {
     
     // Redessiner si l'image de fond est chargée
     if (background.complete) {
+        // Maintenir l'aspect ratio de l'image de fond
         ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
     }
     
@@ -90,14 +91,14 @@ function resetPosition() {
     imgScale = 1.0;
 }
 
-// Fonction de dessin principale
+// Fonction de dessin principale avec cadre circulaire parfait
 function drawCanvas() {
     // Effacer et redessiner le fond
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
     
     if (userImage) {
-        // Calculer les positions actuelles
+        // Calculer les positions actuelles avec le bon ratio
         const circleX = ORIGINAL_CIRCLE_X * scaleRatio;
         const circleY = ORIGINAL_CIRCLE_Y * scaleRatio;
         const circleRadius = ORIGINAL_CIRCLE_RADIUS * scaleRatio;
@@ -105,6 +106,7 @@ function drawCanvas() {
         // Appliquer le masque circulaire
         ctx.save();
         ctx.beginPath();
+        // Utiliser un cercle parfait avec le même ratio pour X et Y
         ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2);
         ctx.closePath();
         ctx.clip();
@@ -115,6 +117,10 @@ function drawCanvas() {
         // Calculer la position de dessin
         const drawX = circleX - circleRadius + (imgOffsetX * scaleRatio) - (scaledSize - circleRadius * 2) / 2;
         const drawY = circleY - circleRadius + (imgOffsetY * scaleRatio) - (scaledSize - circleRadius * 2) / 2;
+        
+        // Activer l'anti-crénelage pour une meilleure qualité
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
         
         ctx.drawImage(
             userImage,
@@ -290,23 +296,34 @@ resetBtn.addEventListener('click', () => {
     drawCanvas();
 });
 
-// Téléchargement
+// Téléchargement (amélioré pour la qualité)
 downloadBtn.addEventListener('click', () => {
-    // Créer un canvas temporaire pour la résolution originale
+    if (!userImage) return;
+    
+    // Facteur de qualité HD
+    const qualityFactor = 3;
+    
+    // Créer un canvas HD temporaire
     const tempCanvas = document.createElement('canvas');
     const tempCtx = tempCanvas.getContext('2d');
     
-    tempCanvas.width = ORIGINAL_WIDTH;
-    tempCanvas.height = ORIGINAL_HEIGHT;
+    // Taille HD
+    tempCanvas.width = ORIGINAL_WIDTH * qualityFactor;
+    tempCanvas.height = ORIGINAL_HEIGHT * qualityFactor;
     
-    // Dessiner l'arrière-plan
-    tempCtx.drawImage(background, 0, 0, ORIGINAL_WIDTH, ORIGINAL_HEIGHT);
+    // Activer l'anti-crénelage HD
+    tempCtx.imageSmoothingEnabled = true;
+    tempCtx.imageSmoothingQuality = 'high';
     
-    if (userImage) {
-        // Calculer les positions
-        const circleX = ORIGINAL_CIRCLE_X;
-        const circleY = ORIGINAL_CIRCLE_Y;
-        const circleRadius = ORIGINAL_CIRCLE_RADIUS;
+    // Dessiner l'arrière-plan en HD
+    const bgHD = new Image();
+    bgHD.onload = () => {
+        tempCtx.drawImage(bgHD, 0, 0, tempCanvas.width, tempCanvas.height);
+        
+        // Calculer les positions HD
+        const circleX = ORIGINAL_CIRCLE_X * qualityFactor;
+        const circleY = ORIGINAL_CIRCLE_Y * qualityFactor;
+        const circleRadius = ORIGINAL_CIRCLE_RADIUS * qualityFactor;
         
         // Appliquer le masque circulaire
         tempCtx.save();
@@ -315,13 +332,14 @@ downloadBtn.addEventListener('click', () => {
         tempCtx.closePath();
         tempCtx.clip();
         
-        // Calculer la taille de l'image avec le zoom
+        // Calculer la taille HD
         const scaledSize = circleRadius * 2 * imgScale;
         
-        // Calculer la position de dessin
-        const drawX = circleX - circleRadius + imgOffsetX - (scaledSize - circleRadius * 2) / 2;
-        const drawY = circleY - circleRadius + imgOffsetY - (scaledSize - circleRadius * 2) / 2;
+        // Calculer la position HD
+        const drawX = circleX - circleRadius + (imgOffsetX * qualityFactor) - (scaledSize - circleRadius * 2) / 2;
+        const drawY = circleY - circleRadius + (imgOffsetY * qualityFactor) - (scaledSize - circleRadius * 2) / 2;
         
+        // Dessiner l'image utilisateur en HD
         tempCtx.drawImage(
             userImage,
             drawX,
@@ -331,11 +349,19 @@ downloadBtn.addEventListener('click', () => {
         );
         
         tempCtx.restore();
-    }
-    
-    // Créer le lien de téléchargement
-    const link = document.createElement('a');
-    link.download = 'mon_affiche_jeja.png';
-    link.href = tempCanvas.toDataURL('image/png');
-    link.click();
+        
+        // Dessiner le cadre circulaire HD
+        tempCtx.beginPath();
+        tempCtx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2);
+        tempCtx.lineWidth = 2 * qualityFactor;
+        tempCtx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+        tempCtx.stroke();
+        
+        // Créer le lien de téléchargement
+        const link = document.createElement('a');
+        link.download = 'mon_affiche_jeja.png';
+        link.href = tempCanvas.toDataURL('image/png');
+        link.click();
+    };
+    bgHD.src = background.src;
 });
