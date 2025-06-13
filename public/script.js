@@ -7,13 +7,13 @@ const zoomOutBtn = document.getElementById('zoomOutBtn');
 const resetBtn = document.getElementById('resetBtn');
 
 // Dimensions originales
-const ORIGINAL_WIDTH = 600;
-const ORIGINAL_HEIGHT = 800;
+const ORIGINAL_WIDTH = 499;
+const ORIGINAL_HEIGHT = 605;
 
 // Position originale du cadre circulaire
-const ORIGINAL_CIRCLE_X = 500;
+const ORIGINAL_CIRCLE_X = 340;
 const ORIGINAL_CIRCLE_Y = 250;
-const ORIGINAL_CIRCLE_RADIUS = 100;
+const ORIGINAL_CIRCLE_RADIUS = 130;
 
 // Variables pour le positionnement et zoom
 let isDragging = false;
@@ -27,7 +27,7 @@ let scaleRatio = 1;
 
 // Background image
 const background = new Image();
-background.src = 'affiche.jpg';
+background.src = 'jeja.jpg';
 background.onload = () => {
     resizeCanvas();
 };
