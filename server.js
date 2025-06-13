@@ -21,7 +21,7 @@ app.post('/upload', upload.single('photo'), async (req, res) => {
 
     // Load user upload from buffer
     const userImg = await Jimp.read(req.file.buffer);
-    userImg.resize(100, 100);
+    userImg.resize(100, Jimp.AUTO);
 
     // Composite user image onto event image at (50,50)
     eventImage.composite(userImg, 50, 50);

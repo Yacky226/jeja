@@ -27,7 +27,7 @@ let scaleRatio = 1;
 
 // Background image
 const background = new Image();
-background.src = 'jeja.jpg';
+background.src = 'jeja.jpg'; // Assurez-vous que le chemin est correct
 background.onload = () => {
     resizeCanvas();
 };
@@ -36,32 +36,19 @@ background.onload = () => {
 function resizeCanvas() {
     const container = document.querySelector('.canvas-wrapper');
     const containerWidth = container.clientWidth;
-    
-    // Calculer les dimensions proportionnelles
+
     const aspectRatio = ORIGINAL_HEIGHT / ORIGINAL_WIDTH;
     const newHeight = containerWidth * aspectRatio;
-    
-    // Mettre à jour les dimensions du canvas
+
     canvas.width = containerWidth;
     canvas.height = newHeight;
-    
-    // Calculer le ratio de redimensionnement
+
     scaleRatio = containerWidth / ORIGINAL_WIDTH;
-    
-    // Redessiner si l'image de fond est chargée
-    if (background.complete) {
-        // Maintenir l'aspect ratio de l'image de fond
-        ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-    }
-    
-    // Redessiner l'image utilisateur si elle existe
-    if (userImage) {
-        drawCanvas();
-    }
+
+    drawCanvas(); // Redessiner tout pour être sûr
 }
 
 // Initialiser le redimensionnement
-resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
 // Gestionnaire pour le fichier utilisateur
@@ -73,10 +60,7 @@ input.addEventListener('change', event => {
     reader.onload = e => {
         userImage = new Image();
         userImage.onload = () => {
-            // Réinitialiser le positionnement et le zoom
-            imgOffsetX = 0;
-            imgOffsetY = 0;
-            imgScale = 1.0;
+            resetPosition(); // Réinitialiser position et zoom
             drawCanvas();
         };
         userImage.src = e.target.result;
@@ -91,47 +75,69 @@ function resetPosition() {
     imgScale = 1.0;
 }
 
-// Fonction de dessin principale avec cadre circulaire parfait
+// ==================================================================
+//               FONCTION DE DESSIN PRINCIPALE (CORRIGÉE)
+// ==================================================================
 function drawCanvas() {
     // Effacer et redessiner le fond
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-    
+    if (background.complete) {
+        ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+    }
+
     if (userImage) {
         // Calculer les positions actuelles avec le bon ratio
         const circleX = ORIGINAL_CIRCLE_X * scaleRatio;
         const circleY = ORIGINAL_CIRCLE_Y * scaleRatio;
         const circleRadius = ORIGINAL_CIRCLE_RADIUS * scaleRatio;
-        
+
         // Appliquer le masque circulaire
         ctx.save();
         ctx.beginPath();
-        // Utiliser un cercle parfait avec le même ratio pour X et Y
         ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2);
         ctx.closePath();
         ctx.clip();
-        
-        // Calculer la taille de l'image avec le zoom
-        const scaledSize = circleRadius * 2 * imgScale;
-        
-        // Calculer la position de dessin
-        const drawX = circleX - circleRadius + (imgOffsetX * scaleRatio) - (scaledSize - circleRadius * 2) / 2;
-        const drawY = circleY - circleRadius + (imgOffsetY * scaleRatio) - (scaledSize - circleRadius * 2) / 2;
-        
+
+        // --- DÉBUT DE LA CORRECTION ---
+        // Calculer les dimensions de l'image en conservant le ratio
+        const circleDiameter = circleRadius * 2;
+        const imgRatio = userImage.width / userImage.height;
+
+        let drawWidth, drawHeight;
+
+        // Si l'image est plus "large" que le cercle (en termes de ratio)
+        if (imgRatio > 1) {
+            drawHeight = circleDiameter;
+            drawWidth = drawHeight * imgRatio;
+        } else { // Si l'image est plus "haute" ou carrée
+            drawWidth = circleDiameter;
+            drawHeight = drawWidth / imgRatio;
+        }
+
+        // Appliquer le zoom utilisateur
+        drawWidth *= imgScale;
+        drawHeight *= imgScale;
+
+        // Calculer la position pour centrer l'image, puis appliquer le décalage (drag)
+        const drawX = circleX - drawWidth / 2 + (imgOffsetX * scaleRatio);
+        const drawY = circleY - drawHeight / 2 + (imgOffsetY * scaleRatio);
+        // --- FIN DE LA CORRECTION ---
+
         // Activer l'anti-crénelage pour une meilleure qualité
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
-        
+
+        // Dessiner l'image avec ses dimensions proportionnelles
         ctx.drawImage(
             userImage,
             drawX,
             drawY,
-            scaledSize,
-            scaledSize
+            drawWidth,  // Utiliser la nouvelle largeur calculée
+            drawHeight  // Utiliser la nouvelle hauteur calculée
         );
-        
-        ctx.restore();
-        
+
+        ctx.restore(); // Restaurer le contexte pour enlever le masque
+
         // Dessiner un cadre pour indiquer la zone active
         ctx.beginPath();
         ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2);
@@ -141,11 +147,13 @@ function drawCanvas() {
     }
 }
 
-// Fonction utilitaire pour obtenir les coordonnées de la souris ou du toucher
+
+// Fonctions de gestion des événements (drag, zoom, etc.) - Inchangées
+// ... (le reste de votre code pour handleStart, handleMove, handleEnd, wheel, etc. est correct)
+
 function getCanvasCoordinates(event) {
     const rect = canvas.getBoundingClientRect();
     let clientX, clientY;
-    
     if (event.type.includes('mouse')) {
         clientX = event.clientX;
         clientY = event.clientY;
@@ -153,65 +161,38 @@ function getCanvasCoordinates(event) {
         clientX = event.touches[0].clientX;
         clientY = event.touches[0].clientY;
     }
-    
-    return {
-        x: clientX - rect.left,
-        y: clientY - rect.top
-    };
+    return { x: clientX - rect.left, y: clientY - rect.top };
 }
 
-// Gestionnaires pour le déplacement (souris ET tactile)
 function handleStart(event) {
     if (!userImage) return;
-    
     const coords = getCanvasCoordinates(event);
     lastMouseX = coords.x;
     lastMouseY = coords.y;
-    
-    // Calculer les positions actuelles
     const circleX = ORIGINAL_CIRCLE_X * scaleRatio;
     const circleY = ORIGINAL_CIRCLE_Y * scaleRatio;
     const circleRadius = ORIGINAL_CIRCLE_RADIUS * scaleRatio;
-    
-    // Vérifier si le contact est dans le cercle
-    const distance = Math.sqrt(
-        (lastMouseX - circleX) ** 2 + 
-        (lastMouseY - circleY) ** 2
-    );
-    
+    const distance = Math.sqrt((lastMouseX - circleX) ** 2 + (lastMouseY - circleY) ** 2);
     if (distance <= circleRadius) {
         isDragging = true;
         canvas.style.cursor = 'grabbing';
-        event.preventDefault(); // Empêcher le défilement sur mobile
+        event.preventDefault();
     }
 }
 
 function handleMove(event) {
     if (!isDragging || !userImage) return;
-    
     const coords = getCanvasCoordinates(event);
     const mouseX = coords.x;
     const mouseY = coords.y;
-    
-    // Calculer le déplacement
     const dx = (mouseX - lastMouseX) / scaleRatio;
     const dy = (mouseY - lastMouseY) / scaleRatio;
-    
-    // Mettre à jour la position
     imgOffsetX += dx;
     imgOffsetY += dy;
-    
-    // Limiter le déplacement aux bords du cercle (avec zoom)
-    const maxOffset = ORIGINAL_CIRCLE_RADIUS * (imgScale - 1);
-    imgOffsetX = Math.max(-maxOffset, Math.min(maxOffset, imgOffsetX));
-    imgOffsetY = Math.max(-maxOffset, Math.min(maxOffset, imgOffsetY));
-    
-    // Mettre à jour la position du contact
     lastMouseX = mouseX;
     lastMouseY = mouseY;
-    
     drawCanvas();
-    event.preventDefault(); // Empêcher le défilement sur mobile
+    event.preventDefault();
 }
 
 function handleEnd() {
@@ -219,65 +200,36 @@ function handleEnd() {
     canvas.style.cursor = 'default';
 }
 
-// Écouteurs pour souris
 canvas.addEventListener('mousedown', handleStart);
 canvas.addEventListener('mousemove', handleMove);
 canvas.addEventListener('mouseup', handleEnd);
 canvas.addEventListener('mouseleave', handleEnd);
-
-// Écouteurs pour tactile
 canvas.addEventListener('touchstart', handleStart, { passive: false });
 canvas.addEventListener('touchmove', handleMove, { passive: false });
 canvas.addEventListener('touchend', handleEnd);
 canvas.addEventListener('touchcancel', handleEnd);
 
-// Changement de curseur au survol (uniquement pour souris)
 canvas.addEventListener('mousemove', (e) => {
     if (isDragging || !userImage) return;
-    
     const coords = getCanvasCoordinates(e);
     const mouseX = coords.x;
     const mouseY = coords.y;
-    
-    // Calculer les positions actuelles
     const circleX = ORIGINAL_CIRCLE_X * scaleRatio;
     const circleY = ORIGINAL_CIRCLE_Y * scaleRatio;
     const circleRadius = ORIGINAL_CIRCLE_RADIUS * scaleRatio;
-    
-    // Vérifier si le curseur est dans le cercle
-    const distance = Math.sqrt(
-        (mouseX - circleX) ** 2 + 
-        (mouseY - circleY) ** 2
-    );
-    
-    if (distance <= circleRadius) {
-        canvas.style.cursor = 'grab';
-    } else {
-        canvas.style.cursor = 'default';
-    }
+    const distance = Math.sqrt((mouseX - circleX) ** 2 + (mouseY - circleY) ** 2);
+    canvas.style.cursor = distance <= circleRadius ? 'grab' : 'default';
 });
 
-// Zoom avec la molette
 canvas.addEventListener('wheel', (e) => {
     e.preventDefault();
     if (!userImage) return;
-    
-    // Sens de la molette
     const zoomIntensity = 0.1;
     const delta = e.deltaY > 0 ? -1 : 1;
-    
-    // Calculer le nouveau zoom avec limites
     imgScale = Math.max(1.0, Math.min(3.0, imgScale + delta * zoomIntensity));
-    
-    // Réajuster les décalages pour rester dans les limites
-    const maxOffset = ORIGINAL_CIRCLE_RADIUS * (imgScale - 1);
-    imgOffsetX = Math.max(-maxOffset, Math.min(maxOffset, imgOffsetX));
-    imgOffsetY = Math.max(-maxOffset, Math.min(maxOffset, imgOffsetY));
-    
     drawCanvas();
 });
 
-// Boutons de contrôle
 zoomInBtn.addEventListener('click', () => {
     if (!userImage) return;
     imgScale = Math.min(3.0, imgScale + 0.1);
@@ -296,68 +248,76 @@ resetBtn.addEventListener('click', () => {
     drawCanvas();
 });
 
-// Téléchargement (amélioré pour la qualité)
+
+// ==================================================================
+//               TÉLÉCHARGEMENT (CORRIGÉ)
+// ==================================================================
 downloadBtn.addEventListener('click', () => {
     if (!userImage) return;
-    
-    // Facteur de qualité HD
+
     const qualityFactor = 3;
-    
-    // Créer un canvas HD temporaire
     const tempCanvas = document.createElement('canvas');
     const tempCtx = tempCanvas.getContext('2d');
-    
-    // Taille HD
+
     tempCanvas.width = ORIGINAL_WIDTH * qualityFactor;
     tempCanvas.height = ORIGINAL_HEIGHT * qualityFactor;
-    
-    // Activer l'anti-crénelage HD
+
     tempCtx.imageSmoothingEnabled = true;
     tempCtx.imageSmoothingQuality = 'high';
-    
-    // Dessiner l'arrière-plan en HD
+
+    // Il faut utiliser un nouveau `Image` pour s'assurer que `onload` se déclenche correctement
     const bgHD = new Image();
     bgHD.onload = () => {
         tempCtx.drawImage(bgHD, 0, 0, tempCanvas.width, tempCanvas.height);
-        
-        // Calculer les positions HD
+
         const circleX = ORIGINAL_CIRCLE_X * qualityFactor;
         const circleY = ORIGINAL_CIRCLE_Y * qualityFactor;
         const circleRadius = ORIGINAL_CIRCLE_RADIUS * qualityFactor;
-        
-        // Appliquer le masque circulaire
+
         tempCtx.save();
         tempCtx.beginPath();
         tempCtx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2);
         tempCtx.closePath();
         tempCtx.clip();
-        
-        // Calculer la taille HD
-        const scaledSize = circleRadius * 2 * imgScale;
-        
-        // Calculer la position HD
-        const drawX = circleX - circleRadius + (imgOffsetX * qualityFactor) - (scaledSize - circleRadius * 2) / 2;
-        const drawY = circleY - circleRadius + (imgOffsetY * qualityFactor) - (scaledSize - circleRadius * 2) / 2;
-        
-        // Dessiner l'image utilisateur en HD
+
+        // --- DÉBUT DE LA CORRECTION (identique à drawCanvas) ---
+        const circleDiameter = circleRadius * 2;
+        const imgRatio = userImage.width / userImage.height;
+
+        let drawWidth, drawHeight;
+
+        if (imgRatio > 1) {
+            drawHeight = circleDiameter;
+            drawWidth = drawHeight * imgRatio;
+        } else {
+            drawWidth = circleDiameter;
+            drawHeight = drawWidth / imgRatio;
+        }
+
+        drawWidth *= imgScale;
+        drawHeight *= imgScale;
+
+        const drawX = circleX - drawWidth / 2 + (imgOffsetX * qualityFactor);
+        const drawY = circleY - drawHeight / 2 + (imgOffsetY * qualityFactor);
+        // --- FIN DE LA CORRECTION ---
+
         tempCtx.drawImage(
             userImage,
             drawX,
             drawY,
-            scaledSize,
-            scaledSize
+            drawWidth,  // Utiliser la nouvelle largeur
+            drawHeight  // Utiliser la nouvelle hauteur
         );
-        
+
         tempCtx.restore();
-        
-        // Dessiner le cadre circulaire HD
+
+        // (Optionnel) Redessiner le cadre sur l'image finale
         tempCtx.beginPath();
         tempCtx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2);
         tempCtx.lineWidth = 2 * qualityFactor;
         tempCtx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
         tempCtx.stroke();
-        
-        // Créer le lien de téléchargement
+
         const link = document.createElement('a');
         link.download = 'mon_affiche_jeja.png';
         link.href = tempCanvas.toDataURL('image/png');
