@@ -42,18 +42,16 @@ body {
   gap: 10px;
 }
 
-/* Zoom-controls – version compacte */
+/* Zoom-controls – Une seule ligne, boutons égaux */
 .zoom-controls {
   display: flex;
-  gap: 6px;            /* moins d’espacement entre les boutons */
-  justify-content: center;
+  gap: 6px;        /* Espace entre les boutons */
+  width: 100%;     /* Occupe toute la largeur du container */
 }
 
 .zoom-controls button {
-  flex: 0 1 auto;      /* ne s’étire pas pour remplir toute la ligne */
-  max-width: 100px;    /* limite leur largeur maxi */
-  padding: 6px 10px;   /* padding plus compact */
-  margin: 2px;         /* petit écart périphérique */
+  flex: 1;             /* Chaque bouton prend la même largeur */
+  padding: 8px;        /* Ajuste vertical/horizontal */
   font-size: 14px;
   white-space: nowrap;
   border: none;
@@ -103,7 +101,6 @@ input[type="file"]:hover,
   border: 1px solid #ccc;
   border-radius: 4px;
   background-color: #f8f8f8;
-  box-sizing: border-box;
   overflow: hidden;
 }
 
@@ -115,15 +112,13 @@ input[type="file"]:hover,
   width: 100% !important;
   height: 100% !important;
   cursor: default;
-  
-  /* Empêcher la sélection de texte pendant le déplacement */
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  touch-action: none; /* Désactive le défilement par défaut */
+  touch-action: none;
 }
 
 /* Instructions */
@@ -154,13 +149,9 @@ input[type="file"]:hover,
     background: #fff;
   }
   
-  .zoom-controls {
-    flex-wrap: wrap;
-  }
-  
+  /* Même ligne, boutons un peu plus gros si besoin */
   .zoom-controls button {
-    max-width: 80px;     /* encore plus compact */
-    padding: 8px 6px;
+    padding: 10px 6px;
     font-size: 15px;
   }
   
@@ -180,7 +171,7 @@ input[type="file"]:hover,
 /* Boutons plus grands sur très petits écrans */
 @media (max-width: 480px) {
   .zoom-controls button {
-    flex: 1 0 100%;
-    margin: 5px 0;
+    padding: 12px 8px;
+    font-size: 16px;
   }
 }
